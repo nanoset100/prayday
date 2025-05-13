@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
-import 'services/notification_service.dart';
 import 'services/supabase_service.dart';
 import 'screens/prayer_list_screen.dart';
 import 'services/prayer_repository.dart';
@@ -17,13 +16,6 @@ void main() async {
 
   // 환경 변수 로드
   await dotenv.load();
-
-  // 알림 서비스 초기화
-  final notificationService = NotificationService();
-  await notificationService.initialize();
-
-  // 권한 요청 (앱 시작 시 자동으로 요청)
-  await notificationService.requestPermission();
 
   // 로컬 저장소 생성
   final localRepository = LocalPrayerRepository(PrayerStorageService());

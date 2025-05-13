@@ -9,7 +9,6 @@ import '../models/user_prayer.dart';
 import '../services/prayer_save_service.dart';
 import '../widgets/tag_selector.dart';
 import 'prayer_input_screen.dart'; // PrayerInputScreen 클래스는 오직 여기서만 import
-import 'notification_test_screen.dart';
 
 class PrayerListScreen extends StatefulWidget {
   const PrayerListScreen({super.key});
@@ -164,32 +163,6 @@ class _PrayerListScreenState extends State<PrayerListScreen> {
             icon: const Icon(Icons.refresh),
             onPressed: _loadPrayers,
             tooltip: '새로고침',
-          ),
-
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              if (value == 'notifications') {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const NotificationTestScreen(),
-                  ),
-                );
-              }
-            },
-            itemBuilder:
-                (context) => [
-                  const PopupMenuItem<String>(
-                    value: 'notifications',
-                    child: Row(
-                      children: [
-                        Icon(Icons.notifications),
-                        SizedBox(width: 8),
-                        Text('알림 설정'),
-                      ],
-                    ),
-                  ),
-                ],
           ),
         ],
       ),
