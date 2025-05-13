@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:provider/provider.dart';
 import 'services/supabase_service.dart';
 import 'screens/prayer_list_screen.dart';
 import 'services/prayer_repository.dart';
 import 'services/prayer_storage_service.dart';
-import 'providers/language_provider.dart';
+import 'services/stats_service.dart';
 
 // 글로벌 저장소 인스턴스
 late PrayerRepository prayerRepository;
@@ -16,6 +15,9 @@ void main() async {
 
   // 환경 변수 로드
   await dotenv.load();
+
+  // 앱 방문 기록
+  await StatsService.recordVisit();
 
   // 로컬 저장소 생성
   final localRepository = LocalPrayerRepository(PrayerStorageService());
@@ -50,26 +52,13 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // 언어 Provider 초기화 및 제공
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider<LanguageProvider>(
-          create: (_) {
-            final provider = LanguageProvider();
-            // 비동기로 SharedPreferences에서 언어 설정 로드
-            provider.initialize();
-            return provider;
-          },
-        ),
-      ],
-      child: MaterialApp(
-        title: '일상 기도기록',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-          useMaterial3: true,
-        ),
-        home: const PrayerListScreen(),
+    return MaterialApp(
+      title: '일상 기도기록',
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+        useMaterial3: true,
       ),
+      home: const PrayerListScreen(),
     );
   }
 }

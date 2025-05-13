@@ -1,7 +1,7 @@
 name: my_prayer
 description: A prayer journal app
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: '>=3.7.0 <4.0.0'
@@ -15,7 +15,6 @@ dependencies:
   shared_preferences: ^2.2.2
   intl: ^0.20.2
   supabase_flutter: ^2.8.4
-  provider: ^6.0.5
   share_plus: ^11.0.0
 
 dev_dependencies:

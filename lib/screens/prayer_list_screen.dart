@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../services/prayer_data_example.dart';
-import '../providers/language_provider.dart';
-import '../widgets/language_selector.dart';
-import 'prayer_detail_screen.dart';
-import '../main.dart'; // 글로벌 prayerRepository 접근을 위해 import
 import '../models/user_prayer.dart';
 import '../services/prayer_save_service.dart';
 import '../widgets/tag_selector.dart';
-import 'prayer_input_screen.dart'; // PrayerInputScreen 클래스는 오직 여기서만 import
+import 'prayer_detail_screen.dart';
+import 'prayer_input_screen.dart';
+import 'stats_screen.dart';
 
 class PrayerListScreen extends StatefulWidget {
   const PrayerListScreen({super.key});
@@ -18,8 +14,6 @@ class PrayerListScreen extends StatefulWidget {
 }
 
 class _PrayerListScreenState extends State<PrayerListScreen> {
-  // 글로벌 저장소 인스턴스 사용
-  // final PrayerRepository _repository = LocalPrayerRepository(PrayerStorageService());
   List<UserPrayer> _prayers = [];
   List<UserPrayer> _filteredPrayers = [];
   bool _isLoading = true;
@@ -39,12 +33,6 @@ class _PrayerListScreenState extends State<PrayerListScreen> {
 
     try {
       final prayers = await PrayerSaveService.getAllUserPrayers();
-
-      // 기도문이 없으면 예제 데이터 로드
-      if (prayers.isEmpty) {
-        await _loadSampleData();
-        return;
-      }
 
       // 날짜 기준 오름차순 정렬
       prayers.sort((a, b) => a.date.compareTo(b.date));
@@ -90,45 +78,6 @@ class _PrayerListScreenState extends State<PrayerListScreen> {
     });
   }
 
-  // 예제 데이터 불러오기
-  Future<void> _loadSampleData() async {
-    try {
-      final samplePrayers = PrayerDataExample.getSamplePrayers();
-      await prayerRepository.importPrayers(samplePrayers);
-
-      // 데이터 재로드
-      final prayerList = await prayerRepository.getAllPrayers();
-      prayerList.sort((a, b) => a.date.compareTo(b.date));
-
-      // Prayer 타입을 UserPrayer 타입으로 매핑/변환 (구조에 맞게 조정)
-      final userPrayers =
-          prayerList
-              .map(
-                (p) => UserPrayer(
-                  date: p.date,
-                  time: '12:00', // 기본 시간
-                  userInput: p.prayerKo, // 한국어 기도문
-                  aiPrayer: p.prayerEn, // 영어 기도문을 AI 기도로 설정
-                  tag: PrayerTags.OTHER, // 기본 태그 설정
-                ),
-              )
-              .toList();
-
-      setState(() {
-        _prayers = userPrayers;
-        _applyTagFilter(); // 태그 필터 적용
-        _isLoading = false;
-      });
-
-      _showMessage('예제 기도문을 불러왔습니다');
-    } catch (e) {
-      setState(() {
-        _isLoading = false;
-      });
-      _showMessage('예제 데이터 로드 오류: $e');
-    }
-  }
-
   // 메시지 표시
   void _showMessage(String message) {
     if (!mounted) return;
@@ -140,22 +89,20 @@ class _PrayerListScreenState extends State<PrayerListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // 언어 Provider 접근
-    final languageProvider = Provider.of<LanguageProvider>(context);
-    final String currentLanguage = languageProvider.currentLanguage;
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('일일 기도문'),
         actions: [
-          // 언어 선택 버튼
-          const LanguageSelector(),
-
-          // 예제 데이터 로드 버튼
+          // 통계 화면 버튼
           IconButton(
-            icon: const Icon(Icons.data_array),
-            onPressed: _loadSampleData,
-            tooltip: '예제 데이터 불러오기',
+            icon: const Icon(Icons.insights),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const StatsScreen()),
+              );
+            },
+            tooltip: '나의 기록',
           ),
 
           // 새로고침 버튼
@@ -344,28 +291,6 @@ class _PrayerListScreenState extends State<PrayerListScreen> {
         },
       ),
     );
-  }
-
-  Future<bool> _confirmDelete(BuildContext context) async {
-    return await showDialog<bool>(
-          context: context,
-          builder:
-              (context) => AlertDialog(
-                title: const Text('기도문 삭제'),
-                content: const Text('이 기도문을 삭제하시겠습니까?'),
-                actions: [
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(false),
-                    child: const Text('취소'),
-                  ),
-                  TextButton(
-                    onPressed: () => Navigator.of(context).pop(true),
-                    child: const Text('삭제'),
-                  ),
-                ],
-              ),
-        ) ??
-        false;
   }
 
   Future<void> _deletePrayer(UserPrayer prayer) async {
